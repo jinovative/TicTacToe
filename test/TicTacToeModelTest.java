@@ -25,48 +25,6 @@ public class TicTacToeModelTest {
   }
 
   @Test
-  public void testHorizontalWin() {
-    ttt1.move(0, 0); // X takes upper left
-    assertFalse(ttt1.isGameOver());
-    ttt1.move(1, 0); // O takes middle left
-    ttt1.move(0, 1); // X takes upper middle
-    assertNull(ttt1.getWinner());
-    ttt1.move(2, 0); // O takes lower left
-    ttt1.move(0, 2); // X takes upper right
-    assertTrue(ttt1.isGameOver());
-    assertEquals(Player.X, ttt1.getWinner());
-    assertEquals(" X | X | X\n"
-                          + "-----------\n"
-                          + " O |   |  \n"
-                          + "-----------\n"
-                          + " O |   |  ", ttt1.toString());
-  }
-
-  @Test
-  public void testDiagonalWin() {
-    diagonalWinHelper();
-    assertTrue(ttt1.isGameOver());
-    assertEquals(Player.O, ttt1.getWinner());
-    assertEquals(" X | X | O\n"
-            + "-----------\n"
-            + " X | O |  \n"
-            + "-----------\n"
-            + " O |   |  ", ttt1.toString());
-  }
-
-  // set up situation where game is over, O wins on the diagonal, board is not full
-  private void diagonalWinHelper() {
-    ttt1.move(0, 0); // X takes upper left
-    assertFalse(ttt1.isGameOver());
-    ttt1.move(2, 0); // O takes lower left
-    ttt1.move(1, 0); // X takes middle left
-    assertNull(ttt1.getWinner());
-    ttt1.move(1, 1); // O takes center
-    ttt1.move(0, 1); // X takes upper middle
-    ttt1.move(0, 2); // O takes upper right
-  }
-
-  @Test
   public void testInvalidMove() {
     ttt1.move(0, 0);
     assertEquals(Player.O, ttt1.getTurn());
@@ -93,6 +51,50 @@ public class TicTacToeModelTest {
     ttt1.move(2, 2); // 2,2 is an empty position
   }
 
+
+  @Test
+  public void testHorizontalWin() {
+    ttt1.move(0, 0); // X takes upper left
+    assertFalse(ttt1.isGameOver());
+    ttt1.move(1, 0); // O takes middle left
+    ttt1.move(0, 1); // X takes upper middle
+    assertNull(ttt1.getWinner());
+    ttt1.move(2, 0); // O takes lower left
+    ttt1.move(0, 2); // X takes upper right
+    assertTrue(ttt1.isGameOver());
+    assertEquals(Player.X, ttt1.getWinner());
+    assertEquals(" X | X | X\n"
+            + "-----------\n"
+            + " O |   |  \n"
+            + "-----------\n"
+            + " O |   |  ", ttt1.toString());
+  }
+
+  @Test
+  public void testDiagonalWin() {
+    diagonalWinHelper();
+    assertTrue(ttt1.isGameOver());
+    assertEquals(Player.O, ttt1.getWinner());
+    assertEquals(" X | X | O\n"
+            + "-----------\n"
+            + " X | O |  \n"
+            + "-----------\n"
+            + " O |   |  ", ttt1.toString());
+  }
+
+  // set up situation where game is over, O wins on the diagonal, board is not full
+  private void diagonalWinHelper() {
+    ttt1.move(0, 0); // X takes upper left
+    assertFalse(ttt1.isGameOver());
+    ttt1.move(2, 0); // O takes lower left
+    ttt1.move(1, 0); // X takes middle left
+    assertNull(ttt1.getWinner());
+    ttt1.move(1, 1); // O takes center
+    ttt1.move(0, 1); // X takes upper middle
+    ttt1.move(0, 2); // O takes upper right
+  }
+
+
   @Test
   public void testCatsGame() {
     ttt1.move(0, 0);
@@ -108,7 +110,7 @@ public class TicTacToeModelTest {
     ttt1.move(2, 0);
     assertTrue(ttt1.isGameOver());
     assertNull(ttt1.getWinner());
-    assertEquals( " X | O | X\n"
+    assertEquals(" X | O | X\n"
             + "-----------\n"
             + " O | O | X\n"
             + "-----------\n"
@@ -145,4 +147,90 @@ public class TicTacToeModelTest {
   }
 
   // TODO: test case where board is full AND there is a winner
+
+  @Test
+  public void testSwitchTurn() {
+    // Initially, the turn should be Player.X
+    assertEquals(Player.X, ttt1.getTurn());
+
+    // After switching turn, it should be Player.O
+    ttt1.move(0, 0); // X
+    assertEquals(Player.O, ttt1.getTurn());
+
+    // After switching turn again, it should be Player.X
+    ttt1.move(0, 1); // O
+    assertEquals(Player.X, ttt1.getTurn());
+  }
+
+  @Test
+  public void testCheckGameOverInRow() {
+    // Test winning condition in a row (Player.X wins)
+    ttt1.move(0, 0); // X
+    ttt1.move(1, 0); // O
+    ttt1.move(0, 1); // X
+    ttt1.move(1, 1); // O
+    ttt1.move(0, 2); // X
+    // Further moves should not be allowed after the game is over
+    try {
+      ttt1.move(1, 2); // O
+      fail("Expected IllegalStateException to be thrown");
+    } catch (IllegalStateException e) {
+      // Exception expected, do nothing
+    }
+    assertTrue(ttt1.isGameOver());
+    assertEquals(Player.X, ttt1.getWinner());
+  }
+
+  @Test
+  public void testCheckGameOverInCol() {
+    // Test winning condition in a column (Player.O wins)
+    ttt1.move(0, 0); // X
+    ttt1.move(0, 1); // O
+    ttt1.move(1, 0); // X
+    ttt1.move(1, 1); // O
+    ttt1.move(2, 0); // X
+    try {
+      ttt1.move(2, 1); // O
+      fail("Expected IllegalStateException to be thrown");
+    } catch (IllegalStateException e) {
+      // Exception expected, do nothing
+    }
+    assertTrue(ttt1.isGameOver());
+    assertEquals(Player.X, ttt1.getWinner());
+  }
+
+  @Test
+  public void testCheckGameOverInDiagonal() {
+    // Test winning condition in a column (Player.O wins)
+    ttt1.move(0, 0); // X
+    ttt1.move(0, 1); // O
+    ttt1.move(1, 1); // X
+    ttt1.move(0, 2); // O
+    ttt1.move(2, 2); // X
+    try {
+      ttt1.move(2, 2); // O
+      fail("Expected IllegalStateException to be thrown");
+    } catch (IllegalStateException e) {
+      // Exception expected, do nothing
+    }
+    assertTrue(ttt1.isGameOver());
+    assertEquals(Player.X, ttt1.getWinner());
+  }
+
+  @Test
+  public void testFullAndWin() {
+    ttt1.move(0, 0); // X
+    ttt1.move(0, 1); // O
+    ttt1.move(0, 2); // X
+    ttt1.move(1, 0); // O
+    ttt1.move(1, 2); // X
+    ttt1.move(1, 1); // O
+    ttt1.move(2, 0); // X
+    ttt1.move(2, 2); // O
+    ttt1.move(2, 1); // X
+
+    assertTrue(ttt1.isGameOver());
+    assertEquals(Player.X, ttt1.getWinner());
+  }
 }
+
