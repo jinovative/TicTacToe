@@ -32,17 +32,8 @@ public class TicTacToeModel implements TicTacToe {
       row -> " " + Arrays.stream(row).map(
         p -> p == null ? " " : p.toString()).collect(Collectors.joining(" | ")))
           .collect(Collectors.joining("\n-----------\n"));
-    // This is the equivalent code as above, but using iteration, and still using
   }
 
-  /**
-   * Execute a move in the position specified by the given row and column.
-   *
-   * @param r the row of the intended move
-   * @param c the column of the intended move
-   * @throws IllegalArgumentException if the space is occupied or the position is otherwise invalid
-   * @throws IllegalStateException    if the game is over
-   */
   @Override
   public void move(int r, int c) {
     if (gameOver) {
