@@ -3,6 +3,9 @@ package cs5004.tictactoe;
 import java.io.IOException;
 import java.util.Scanner;
 
+/**
+ * This class implements the TicTacToeController interface.
+ */
 public class TicTacToeConsoleController implements TicTacToeController {
   private final Readable in;
   private final Appendable out;
@@ -21,22 +24,26 @@ public class TicTacToeConsoleController implements TicTacToeController {
   @Override
   public void playGame(TicTacToe model) {
     Scanner sc = new Scanner(in);
-    String line;
+
+    try {
+      out.append(model.toString()).append("\n");
+    } catch (IOException e) {
+      throw new IllegalStateException("Append failed.", e);
+    }
 
     while (!model.isGameOver()) {
       try {
-        out.append(model.toString()).append("\n");
-        out.append("Enter a move for " + model.getTurn().toString() + ":\n");
+        out.append("Enter a move for ").append(model.getTurn().toString()).append(":\n");
       } catch (IOException e) {
         throw new IllegalStateException("Append failed.", e);
       }
 
       if (!sc.hasNext()) {
-        return; // no more input
+        return;
       }
-      line = sc.nextLine().trim();
+      String token = sc.next().trim();
 
-      if (line.equalsIgnoreCase("q")) {
+      if (token.equalsIgnoreCase("q")) {
         try {
           out.append("Game quit! Ending game state:\n").append(model.toString()).append("\n");
         } catch (IOException e) {
@@ -45,31 +52,39 @@ public class TicTacToeConsoleController implements TicTacToeController {
         return;
       }
 
-      String[] parts = line.split(" ");
-      if (parts.length != 2) {
-        continue;
-      }
-
       try {
-        int row = Integer.parseInt(parts[0]) - 1;
-        int col = Integer.parseInt(parts[1]) - 1;
+        int row = Integer.parseInt(token) - 1;
+        if (!sc.hasNext()) {
+          continue;
+        }
+        int col = Integer.parseInt(sc.next()) - 1;
         model.move(row, col);
+        try {
+          out.append(model.toString()).append("\n");
+        } catch (IOException e) {
+          throw new IllegalStateException("Append failed.", e);
+        }
       } catch (NumberFormatException e) {
-        // Handle non-integer input
+        if (sc.hasNext()) { // only call next() if there is more input
+          sc.next(); // consume the next input, which is expected to be the column number
+        }
         continue;
       } catch (IllegalArgumentException e) {
-        // Handle invalid move
+        try {
+          out.append("Invalid move. Try again.\n");
+        } catch (IOException ex) {
+          throw new IllegalStateException("Append failed.", ex);
+        }
         continue;
       }
     }
 
     try {
-      out.append(model.toString()).append("\n");
-      out.append("Game is over!\n");
+      out.append("Game is over! ");
       if (model.getWinner() != null) {
-        out.append(model.getWinner().toString() + " wins.\n");
+        out.append(model.getWinner().toString() + " wins.");
       } else {
-        out.append("Tie game.\n");
+        out.append("Tie game.");
       }
     } catch (IOException e) {
       throw new IllegalStateException("Append failed.", e);
